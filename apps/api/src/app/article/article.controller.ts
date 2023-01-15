@@ -1,4 +1,4 @@
-import { Controller, Post, UseGuards, Body } from '@nestjs/common'
+import { Controller, Post, UseGuards, Body, Get, Param } from '@nestjs/common'
 import { Observable, map } from 'rxjs'
 import { ArticleService } from './article.service'
 import { AuthGuard } from '../user/guards/auth.guard'
@@ -19,6 +19,13 @@ export class ArticleController {
 	): Observable<ArticleResponse> {
 		return this.articleService
 			.create(user, createArticleDto)
+			.pipe(map(data => this.articleService.buildArticleResponse(data)))
+	}
+
+	@Get(':slug')
+	public findBySlug(@Param('slug') slug: string): Observable<ArticleResponse> {
+		return this.articleService
+			.findBySlug(slug)
 			.pipe(map(data => this.articleService.buildArticleResponse(data)))
 	}
 }

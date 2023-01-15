@@ -26,6 +26,10 @@ export class ArticleService {
 		return from(this.articleRepository.save(article))
 	}
 
+	public findBySlug(slug: string): Observable<ArticleEntity> {
+		return from(this.articleRepository.findOne({ where: { slug } }))
+	}
+
 	public buildArticleResponse(article: ArticleEntity): ArticleResponse {
 		return { article }
 	}
