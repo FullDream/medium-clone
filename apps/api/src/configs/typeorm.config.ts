@@ -1,12 +1,14 @@
 import { DataSourceOptions } from 'typeorm'
+import { TagEntity } from '../app/tag/tag.entity'
+import { UserEntity } from '../app/user/user.entity';
 
 export const TypeOrmConfig: DataSourceOptions = {
 	type: 'postgres',
 	host: 'localhost',
 	port: 5432,
-	username: 'mediumclone',
-	password: '123',
+	username: 'medium-clone',
+	password: 'pgpwmedium',
 	database: 'mediumclone',
-	entities: [__dirname + '/**/*.entity{.ts,.js}'],
+	entities: [TagEntity, UserEntity],
 	synchronize: true,
 }
