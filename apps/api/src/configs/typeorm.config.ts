@@ -1,6 +1,7 @@
 import { DataSourceOptions } from 'typeorm'
 import { TagEntity } from '../app/tag/tag.entity'
 import { UserEntity } from '../app/user/user.entity';
+import { ArticleEntity } from '../app/article/article.entity';
 
 export const TypeOrmConfig: DataSourceOptions = {
 	type: 'postgres',
@@ -9,6 +10,6 @@ export const TypeOrmConfig: DataSourceOptions = {
 	username: 'medium-clone',
 	password: 'pgpwmedium',
 	database: 'mediumclone',
-	entities: [TagEntity, UserEntity],
+	entities: [TagEntity, UserEntity, ArticleEntity],
 	synchronize: true,
 }
