@@ -1,12 +1,13 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common'
 import { UserEntity } from '../user/user.entity'
 import { CreateArticleDto } from './dto/create-article.dto'
-import { Observable, from } from 'rxjs'
+import { Observable, from, mergeMap } from 'rxjs'
 import { ArticleEntity } from './article.entity'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { DeleteResult, Repository } from 'typeorm'
 import { ArticleResponse } from './types/article-response.interface'
 import slugify from 'slugify'
+import { UpdateArticleDto } from './dto/update-article.dto'
 @Injectable()
 export class ArticleService {
 	constructor(
@@ -28,6 +29,48 @@ export class ArticleService {
 
 	public findBySlug(slug: string): Observable<ArticleEntity> {
 		return from(this.articleRepository.findOne({ where: { slug } }))
+	}
+
+	public update(
+		slug: string,
+		userId: number,
+		updateArticleDto: UpdateArticleDto,
+	): Observable<ArticleEntity> {
+		return this.findBySlug(slug).pipe(
+			mergeMap(article => {
+				if (!article) {
+					throw new HttpException('Article does not exist', HttpStatus.NOT_FOUND)
+				}
+
+				if (article.author.id !== userId) {
+					throw new HttpException('You are not author', HttpStatus.FORBIDDEN)
+				}
+
+				const newArticle = { ...article, ...updateArticleDto }
+
+				if (updateArticleDto.title && updateArticleDto.title !== article.title) {
+					newArticle.slug = this.getSlug(updateArticleDto.title)
+				}
+
+				return from(this.articleRepository.save(newArticle))
+			}),
+		)
+	}
+
+	public delete(slug: string, userId: number): Observable<DeleteResult> {
+		return this.findBySlug(slug).pipe(
+			mergeMap(article => {
+				if (!article) {
+					throw new HttpException('Article does not exist', HttpStatus.NOT_FOUND)
+				}
+
+				if (article.author.id !== userId) {
+					throw new HttpException('You are not author', HttpStatus.FORBIDDEN)
+				}
+
+				return from(this.articleRepository.delete({ slug }))
+			}),
+		)
 	}
 
 	public buildArticleResponse(article: ArticleEntity): ArticleResponse {

@@ -1,4 +1,15 @@
-import { Controller, Post, UseGuards, Body, Get, Param } from '@nestjs/common'
+import {
+	Controller,
+	Post,
+	UseGuards,
+	Body,
+	Get,
+	Param,
+	Delete,
+	Put,
+	UsePipes,
+	ValidationPipe,
+} from '@nestjs/common'
 import { Observable, map } from 'rxjs'
 import { ArticleService } from './article.service'
 import { AuthGuard } from '../user/guards/auth.guard'
@@ -6,6 +17,8 @@ import { User } from '../user/decorators/user.decorator'
 import { UserEntity } from '../user/user.entity'
 import { CreateArticleDto } from './dto/create-article.dto'
 import { ArticleResponse } from './types/article-response.interface'
+import { DeleteResult } from 'typeorm'
+import { UpdateArticleDto } from './dto/update-article.dto'
 
 @Controller('articles')
 export class ArticleController {
@@ -13,6 +26,7 @@ export class ArticleController {
 
 	@Post()
 	@UseGuards(AuthGuard)
+	@UsePipes(new ValidationPipe())
 	public create(
 		@User() user: UserEntity,
 		@Body('article') createArticleDto: CreateArticleDto,
@@ -27,5 +41,24 @@ export class ArticleController {
 		return this.articleService
 			.findBySlug(slug)
 			.pipe(map(data => this.articleService.buildArticleResponse(data)))
+	}
+
+	@Put(':slug')
+	@UseGuards(AuthGuard)
+	@UsePipes(new ValidationPipe())
+	public update(
+		@User('id') userId: number,
+		@Param('slug') slug: string,
+		@Body('article') updateArticleDto: UpdateArticleDto,
+	): Observable<ArticleResponse> {
+		return this.articleService
+			.update(slug, userId, updateArticleDto)
+			.pipe(map(data => this.articleService.buildArticleResponse(data)))
+	}
+
+	@Delete(':slug')
+	@UseGuards(AuthGuard)
+	public delete(@User('id') userId: number, @Param('slug') slug: string): Observable<DeleteResult> {
+		return this.articleService.delete(slug, userId)
 	}
 }
