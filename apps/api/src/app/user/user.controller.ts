@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Post, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common'
+import {
+	Body,
+	Controller,
+	Get,
+	Patch,
+	Post,
+	Put,
+	UseGuards,
+	UsePipes,
+	ValidationPipe,
+} from '@nestjs/common'
 import { Observable, mergeMap } from 'rxjs'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UserService } from './user.service'
@@ -7,6 +17,7 @@ import { LoginUserDto } from './dto/login-user.dto'
 import { User } from './decorators/user.decorator'
 import { UserEntity } from './user.entity'
 import { AuthGuard } from './guards/auth.guard'
+import { UpdateUserDto } from './dto/update-user.dto'
 
 @Controller()
 export class UserController {
@@ -32,5 +43,16 @@ export class UserController {
 	@UseGuards(AuthGuard)
 	public currentUser(@User() user: UserEntity): Observable<UserResponse> {
 		return this.userService.buildUserResponse(user)
+	}
+
+	@Put('user')
+	@UseGuards(AuthGuard)
+	public update(
+		@User('id') userId: number,
+		@Body('user') updateUserDto: UpdateUserDto,
+	): Observable<UserResponse> {
+		return this.userService
+			.update(userId, updateUserDto)
+			.pipe(mergeMap(user => this.userService.buildUserResponse(user)))
 	}
 }

@@ -10,6 +10,7 @@ import { JWT_SECRET } from '../../configs/jwt.config'
 import { UserResponse } from './types/user-response.interface'
 import { LoginUserDto } from './dto/login-user.dto'
 import { compare } from 'bcrypt'
+import { UpdateUserDto } from './dto/update-user.dto'
 
 @Injectable()
 export class UserService {
@@ -58,6 +59,12 @@ export class UserService {
 					}),
 				)
 			}),
+		)
+	}
+
+	public update(id: number, updateUserDto: UpdateUserDto): Observable<UserEntity> {
+		return from(this.userRepository.update(id, updateUserDto)).pipe(
+			mergeMap(() => this.findById(id)),
 		)
 	}
 
