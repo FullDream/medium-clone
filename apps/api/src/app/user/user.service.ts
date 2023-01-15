@@ -61,6 +61,10 @@ export class UserService {
 		)
 	}
 
+	public findById(id: number): Observable<UserEntity> {
+		return from(this.userRepository.findOne({ where: { id } }))
+	}
+
 	private generateJwt({ id, email, username }: UserEntity): string {
 		return sign({ id, email, username }, JWT_SECRET)
 	}
