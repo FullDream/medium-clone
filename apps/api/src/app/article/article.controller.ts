@@ -9,8 +9,9 @@ import {
 	Put,
 	UsePipes,
 	ValidationPipe,
+	Query,
 } from '@nestjs/common'
-import { Observable, map } from 'rxjs'
+import { Observable, map, from } from 'rxjs'
 import { ArticleService } from './article.service'
 import { AuthGuard } from '../user/guards/auth.guard'
 import { User } from '../user/decorators/user.decorator'
@@ -19,10 +20,20 @@ import { CreateArticleDto } from './dto/create-article.dto'
 import { ArticleResponse } from './types/article-response.interface'
 import { DeleteResult } from 'typeorm'
 import { UpdateArticleDto } from './dto/update-article.dto'
+import { ArticlesQuery } from './types/articles-query.interface'
+import { ArticlesResponse } from './types/articles-response.interface'
 
 @Controller('articles')
 export class ArticleController {
 	constructor(private readonly articleService: ArticleService) {}
+
+	@Get()
+	public findAll(
+		@User('id') userId: number,
+		@Query() query: ArticlesQuery,
+	): Observable<ArticlesResponse> {
+		return from(this.articleService.findAll(userId, query))
+	}
 
 	@Post()
 	@UseGuards(AuthGuard)

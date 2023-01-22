@@ -1,18 +1,52 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common'
 import { UserEntity } from '../user/user.entity'
 import { CreateArticleDto } from './dto/create-article.dto'
-import { Observable, from, mergeMap } from 'rxjs'
+import { Observable, from, mergeMap, forkJoin, map, tap } from 'rxjs'
 import { ArticleEntity } from './article.entity'
 import { InjectRepository } from '@nestjs/typeorm'
-import { DeleteResult, Repository } from 'typeorm'
+import { DeleteResult, getRepository, Repository } from 'typeorm'
 import { ArticleResponse } from './types/article-response.interface'
 import slugify from 'slugify'
 import { UpdateArticleDto } from './dto/update-article.dto'
+import { ArticlesQuery } from './types/articles-query.interface'
+import { ArticlesResponse } from './types/articles-response.interface'
 @Injectable()
 export class ArticleService {
 	constructor(
 		@InjectRepository(ArticleEntity) private readonly articleRepository: Repository<ArticleEntity>,
+		@InjectRepository(UserEntity) private readonly userRepository: Repository<UserEntity>,
 	) {}
+
+	public async findAll(
+		userId: number,
+		{ limit, offset, author, tag }: ArticlesQuery,
+	): Promise<ArticlesResponse> {
+		const queryBuilder = this.articleRepository
+			.createQueryBuilder('articles')
+			.leftJoinAndSelect('articles.author', 'author')
+
+		queryBuilder.orderBy('articles.createdAt', 'DESC')
+
+		const articlesCount = await queryBuilder.getCount()
+
+		if (tag) {
+			queryBuilder.andWhere('articles.tagList LIKE :tag', {
+				tag: `%${tag}%`,
+			})
+		}
+
+		if (author) {
+			const authorRep = await this.userRepository.findOne({ where: { username: author } })
+			queryBuilder.andWhere('articles.authorId = :id', { id: authorRep.id })
+		}
+
+		if (limit) queryBuilder.limit(limit)
+		if (offset) queryBuilder.offset(offset)
+
+		const articles = await queryBuilder.getMany()
+
+		return { articles, articlesCount }
+	}
 
 	public create(user: UserEntity, createArticleDto: CreateArticleDto): Observable<ArticleEntity> {
 		const article = new ArticleEntity()
