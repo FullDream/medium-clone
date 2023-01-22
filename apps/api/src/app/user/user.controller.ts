@@ -1,14 +1,4 @@
-import {
-	Body,
-	Controller,
-	Get,
-	Patch,
-	Post,
-	Put,
-	UseGuards,
-	UsePipes,
-	ValidationPipe,
-} from '@nestjs/common'
+import { Body, Controller, Get, Post, Put, UseGuards, UsePipes } from '@nestjs/common'
 import { Observable, mergeMap } from 'rxjs'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UserService } from './user.service'
@@ -18,13 +8,14 @@ import { User } from './decorators/user.decorator'
 import { UserEntity } from './user.entity'
 import { AuthGuard } from './guards/auth.guard'
 import { UpdateUserDto } from './dto/update-user.dto'
+import { BackendValidationPipe } from '../common/pipes/backend-validation.pipe'
 
 @Controller()
 export class UserController {
 	constructor(private readonly userService: UserService) {}
 
 	@Post('users')
-	@UsePipes(new ValidationPipe())
+	@UsePipes(new BackendValidationPipe())
 	public create(@Body('user') createUserDto: CreateUserDto): Observable<UserResponse> {
 		return this.userService
 			.create(createUserDto)
@@ -32,7 +23,7 @@ export class UserController {
 	}
 
 	@Post('users/login')
-	@UsePipes(new ValidationPipe())
+	@UsePipes(new BackendValidationPipe())
 	public login(@Body('user') loginUserDto: LoginUserDto): Observable<UserResponse> {
 		return this.userService
 			.login(loginUserDto)

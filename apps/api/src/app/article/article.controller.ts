@@ -22,6 +22,7 @@ import { DeleteResult } from 'typeorm'
 import { UpdateArticleDto } from './dto/update-article.dto'
 import { ArticlesQuery, ArticlesFeedQuery } from './types/articles-query.interface'
 import { ArticlesResponse } from './types/articles-response.interface'
+import { BackendValidationPipe } from '../common/pipes/backend-validation.pipe'
 
 @Controller('articles')
 export class ArticleController {
@@ -46,7 +47,7 @@ export class ArticleController {
 
 	@Post()
 	@UseGuards(AuthGuard)
-	@UsePipes(new ValidationPipe())
+	@UsePipes(new BackendValidationPipe())
 	public create(
 		@User() user: UserEntity,
 		@Body('article') createArticleDto: CreateArticleDto,
@@ -65,7 +66,7 @@ export class ArticleController {
 
 	@Put(':slug')
 	@UseGuards(AuthGuard)
-	@UsePipes(new ValidationPipe())
+	@UsePipes(new BackendValidationPipe())
 	public update(
 		@User('id') userId: number,
 		@Param('slug') slug: string,

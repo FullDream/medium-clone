@@ -18,6 +18,10 @@ export class UserService {
 		@InjectRepository(UserEntity) private readonly userRepository: Repository<UserEntity>,
 	) {}
 	public create(createUserDto: CreateUserDto): Observable<UserEntity> {
+		const errorResponse = {
+			errors: {},
+		}
+
 		const newUser = new UserEntity()
 		Object.assign(newUser, createUserDto)
 		const userByEmail = from(this.userRepository.findOne({ where: { email: createUserDto.email } }))
@@ -27,8 +31,14 @@ export class UserService {
 
 		return forkJoin([userByEmail, userByUsername]).pipe(
 			mergeMap(([email, username]) => {
+				if (email) {
+					errorResponse.errors['email'] = 'has already been taken'
+				}
+				if (username) {
+					errorResponse.errors['username'] = 'has already been taken'
+				}
 				if (email || username) {
-					throw new HttpException('Email or username are taken', HttpStatus.UNPROCESSABLE_ENTITY)
+					throw new HttpException(errorResponse, HttpStatus.UNPROCESSABLE_ENTITY)
 				}
 				return from(this.userRepository.save(newUser))
 			}),
@@ -36,6 +46,9 @@ export class UserService {
 	}
 
 	public login(loginUserDto: LoginUserDto): Observable<UserEntity> {
+		const errorResponse = {
+			errors: { 'email or password': 'in invalid' },
+		}
 		const userByEmail = from(
 			this.userRepository
 				.createQueryBuilder()
@@ -47,12 +60,12 @@ export class UserService {
 		return userByEmail.pipe(
 			mergeMap(user => {
 				if (!user) {
-					throw new HttpException('Credentials are not valid', HttpStatus.UNPROCESSABLE_ENTITY)
+					throw new HttpException(errorResponse, HttpStatus.UNPROCESSABLE_ENTITY)
 				}
 				return from(compare(loginUserDto.password, user.password)).pipe(
 					map(isPasswordCompare => {
 						if (!isPasswordCompare) {
-							throw new HttpException('Credentials are not valid', HttpStatus.UNPROCESSABLE_ENTITY)
+							throw new HttpException(errorResponse, HttpStatus.UNPROCESSABLE_ENTITY)
 						}
 						delete user.password
 						return user
