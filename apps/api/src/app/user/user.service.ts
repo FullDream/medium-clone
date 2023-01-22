@@ -77,6 +77,7 @@ export class UserService {
 	}
 
 	public buildUserResponse(user: UserEntity): Observable<UserResponse> {
+		delete user.password
 		return of({
 			user: {
 				...user,
