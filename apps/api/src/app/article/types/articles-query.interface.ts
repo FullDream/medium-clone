@@ -5,3 +5,5 @@ export interface ArticlesQuery {
 	limit?: number
 	offset?: number
 }
+
+export type ArticlesFeedQuery = Pick<ArticlesQuery, 'offset' | 'limit'>

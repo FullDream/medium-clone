@@ -20,7 +20,7 @@ import { CreateArticleDto } from './dto/create-article.dto'
 import { ArticleResponse } from './types/article-response.interface'
 import { DeleteResult } from 'typeorm'
 import { UpdateArticleDto } from './dto/update-article.dto'
-import { ArticlesQuery } from './types/articles-query.interface'
+import { ArticlesQuery, ArticlesFeedQuery } from './types/articles-query.interface'
 import { ArticlesResponse } from './types/articles-response.interface'
 
 @Controller('articles')
@@ -33,6 +33,15 @@ export class ArticleController {
 		@Query() query: ArticlesQuery,
 	): Observable<ArticlesResponse> {
 		return from(this.articleService.findAll(userId, query))
+	}
+
+	@Get('feed')
+	@UseGuards(AuthGuard)
+	public getFeed(
+		@User('id') userId: number,
+		@Query() query: ArticlesFeedQuery,
+	): Observable<ArticlesResponse> {
+		return from(this.articleService.getFeed(userId, query))
 	}
 
 	@Post()

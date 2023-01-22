@@ -1,20 +1,22 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common'
 import { UserEntity } from '../user/user.entity'
 import { CreateArticleDto } from './dto/create-article.dto'
-import { Observable, from, mergeMap, forkJoin, map, of, lastValueFrom } from 'rxjs'
+import { Observable, from, mergeMap, lastValueFrom } from 'rxjs'
 import { ArticleEntity } from './article.entity'
 import { InjectRepository } from '@nestjs/typeorm'
 import { DeleteResult, Repository } from 'typeorm'
 import { ArticleResponse } from './types/article-response.interface'
 import slugify from 'slugify'
 import { UpdateArticleDto } from './dto/update-article.dto'
-import { ArticlesQuery } from './types/articles-query.interface'
+import { ArticlesQuery, ArticlesFeedQuery } from './types/articles-query.interface'
 import { ArticlesResponse } from './types/articles-response.interface'
+import { FollowEntity } from '../profile/follow.entity'
 @Injectable()
 export class ArticleService {
 	constructor(
 		@InjectRepository(ArticleEntity) private readonly articleRepository: Repository<ArticleEntity>,
 		@InjectRepository(UserEntity) private readonly userRepository: Repository<UserEntity>,
+		@InjectRepository(FollowEntity) private readonly followRepository: Repository<FollowEntity>,
 	) {}
 
 	public async findAll(
@@ -71,6 +73,37 @@ export class ArticleService {
 		})
 
 		return { articles: articlesWithFavorites, articlesCount }
+	}
+
+	public async getFeed(
+		currentUserId: number,
+		{ limit, offset }: ArticlesFeedQuery,
+	): Promise<ArticlesResponse> {
+		const follows = await this.followRepository.find({
+			where: { followerId: currentUserId },
+		})
+
+		if (follows.length === 0) {
+			return { articles: [], articlesCount: 0 }
+		}
+
+		const followingUserIds = follows.map(follow => follow.followingId)
+
+		const queryBuilder = this.articleRepository
+			.createQueryBuilder('articles')
+			.leftJoinAndSelect('articles.author', 'author')
+			.where('articles.authorId IN (:...ids)', { ids: followingUserIds })
+
+		queryBuilder.orderBy('articles.createdAt', 'DESC')
+
+		const articlesCount = await queryBuilder.getCount()
+
+		if (limit) queryBuilder.limit(limit)
+		if (offset) queryBuilder.offset(offset)
+
+		const articles = await queryBuilder.getMany()
+
+		return { articles, articlesCount }
 	}
 
 	public create(user: UserEntity, createArticleDto: CreateArticleDto): Observable<ArticleEntity> {
