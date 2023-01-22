@@ -1,10 +1,10 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common'
 import { UserEntity } from '../user/user.entity'
 import { CreateArticleDto } from './dto/create-article.dto'
-import { Observable, from, mergeMap, forkJoin, map, tap } from 'rxjs'
+import { Observable, from, mergeMap, forkJoin, map, of, lastValueFrom } from 'rxjs'
 import { ArticleEntity } from './article.entity'
 import { InjectRepository } from '@nestjs/typeorm'
-import { DeleteResult, getRepository, Repository } from 'typeorm'
+import { DeleteResult, Repository } from 'typeorm'
 import { ArticleResponse } from './types/article-response.interface'
 import slugify from 'slugify'
 import { UpdateArticleDto } from './dto/update-article.dto'
@@ -19,7 +19,7 @@ export class ArticleService {
 
 	public async findAll(
 		userId: number,
-		{ limit, offset, author, tag }: ArticlesQuery,
+		{ limit, offset, author, tag, favorited }: ArticlesQuery,
 	): Promise<ArticlesResponse> {
 		const queryBuilder = this.articleRepository
 			.createQueryBuilder('articles')
@@ -28,6 +28,17 @@ export class ArticleService {
 		queryBuilder.orderBy('articles.createdAt', 'DESC')
 
 		const articlesCount = await queryBuilder.getCount()
+
+		if (favorited) {
+			const author = await this.userRepository.findOne({
+				where: { username: favorited },
+				relations: ['favorites'],
+			})
+
+			const ids = author.favorites.map(item => item.id)
+
+			queryBuilder.andWhere('articles.authorId IN (:...ids)', { ids })
+		}
 
 		if (tag) {
 			queryBuilder.andWhere('articles.tagList LIKE :tag', {
@@ -43,9 +54,23 @@ export class ArticleService {
 		if (limit) queryBuilder.limit(limit)
 		if (offset) queryBuilder.offset(offset)
 
-		const articles = await queryBuilder.getMany()
+		let favoriteIds: number[] = []
+		if (userId) {
+			const currentUser = await this.userRepository.findOne({
+				where: { id: userId },
+				relations: ['favorites'],
+			})
 
-		return { articles, articlesCount }
+			favoriteIds = currentUser.favorites.map(favorite => favorite.id)
+		}
+
+		const articles = await queryBuilder.getMany()
+		const articlesWithFavorites = articles.map(article => {
+			const favorited = favoriteIds.includes(article.id)
+			return { ...article, favorited }
+		})
+
+		return { articles: articlesWithFavorites, articlesCount }
 	}
 
 	public create(user: UserEntity, createArticleDto: CreateArticleDto): Observable<ArticleEntity> {
@@ -105,6 +130,47 @@ export class ArticleService {
 				return from(this.articleRepository.delete({ slug }))
 			}),
 		)
+	}
+
+	public async addArticleToFavorites(slug: string, userId: number): Promise<ArticleEntity> {
+		const article = await lastValueFrom(this.findBySlug(slug))
+		const user = await this.userRepository.findOne({
+			where: { id: userId },
+			relations: ['favorites'],
+		})
+
+		const isNotFavorited =
+			user.favorites.findIndex(articleInFavorites => articleInFavorites.id === article.id) === -1
+
+		if (isNotFavorited) {
+			user.favorites.push(article)
+			article.favoritesCount++
+			await this.userRepository.save(user)
+			await this.articleRepository.save(article)
+		}
+
+		return article
+	}
+
+	public async deleteArticleFromFavorites(slug: string, userId: number): Promise<ArticleEntity> {
+		const article = await lastValueFrom(this.findBySlug(slug))
+		const user = await this.userRepository.findOne({
+			where: { id: userId },
+			relations: ['favorites'],
+		})
+
+		const articleIndex = user.favorites.findIndex(
+			articleInFavorites => articleInFavorites.id === article.id,
+		)
+
+		if (articleIndex >= 0) {
+			user.favorites.splice(articleIndex, 1)
+			article.favoritesCount--
+			await this.userRepository.save(user)
+			await this.articleRepository.save(article)
+		}
+
+		return article
 	}
 
 	public buildArticleResponse(article: ArticleEntity): ArticleResponse {

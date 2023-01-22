@@ -8,9 +8,16 @@ import { TagModule } from './tag/tag.module'
 import { AuthMiddleware } from './user/middlewares/auth.middleware'
 import { UserModule } from './user/user.module'
 import { ArticleModule } from './article/article.module'
+import { ProfileModule } from './profile/profile.module'
 
 @Module({
-	imports: [TypeOrmModule.forRoot(TypeOrmConfig), TagModule, UserModule, ArticleModule],
+	imports: [
+		TypeOrmModule.forRoot(TypeOrmConfig),
+		TagModule,
+		UserModule,
+		ArticleModule,
+		ProfileModule,
+	],
 	controllers: [AppController],
 	providers: [AppService],
 })

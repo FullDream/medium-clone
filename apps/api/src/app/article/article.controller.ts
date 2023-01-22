@@ -72,4 +72,26 @@ export class ArticleController {
 	public delete(@User('id') userId: number, @Param('slug') slug: string): Observable<DeleteResult> {
 		return this.articleService.delete(slug, userId)
 	}
+
+	@Post(':slug/favorite')
+	@UseGuards(AuthGuard)
+	public addArticleToFavorites(
+		@User('id') userId: number,
+		@Param('slug') slug: string,
+	): Observable<ArticleResponse> {
+		return from(this.articleService.addArticleToFavorites(slug, userId)).pipe(
+			map(data => this.articleService.buildArticleResponse(data)),
+		)
+	}
+
+	@Delete(':slug/favorite')
+	@UseGuards(AuthGuard)
+	public deleteArticleToFavorites(
+		@User('id') userId: number,
+		@Param('slug') slug: string,
+	): Observable<ArticleResponse> {
+		return from(this.articleService.deleteArticleFromFavorites(slug, userId)).pipe(
+			map(data => this.articleService.buildArticleResponse(data)),
+		)
+	}
 }
