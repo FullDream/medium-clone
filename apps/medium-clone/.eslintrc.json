@@ -24,6 +24,28 @@
 						"prefix": "mc",
 						"style": "kebab-case"
 					}
+				],
+				"@typescript-eslint/explicit-member-accessibility": [
+					"error",
+					{
+						"accessibility": "explicit",
+						"overrides": {
+							"accessors": "off",
+							"constructors": "no-public",
+							"methods": "explicit",
+							"properties": "explicit",
+							"parameterProperties": "explicit"
+						},
+						"ignoredMethodNames": [
+							"ngOnInit",
+							"ngDoCheck",
+							"ngOnChanges",
+							"ngOnDestroy",
+							"ngAfterContentInit",
+							"ngAfterContentChecked",
+							"ngAfterViewInit"
+						]
+					}
 				]
 			}
 		},
