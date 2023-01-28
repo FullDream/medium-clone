@@ -7,6 +7,7 @@ import { EffectsModule } from '@ngrx/effects'
 
 import { AppComponent } from './app.component'
 import { environment } from '../environments/environment'
+import {HttpClientModule } from '@angular/common/http';
 
 const routes: Routes = [
 	{
@@ -18,6 +19,7 @@ const routes: Routes = [
 	declarations: [AppComponent],
 	imports: [
 		BrowserModule,
+		HttpClientModule,
 		RouterModule.forRoot(routes),
 		StoreModule.forRoot(
 			{},

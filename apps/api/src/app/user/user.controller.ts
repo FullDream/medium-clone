@@ -2,13 +2,13 @@ import { Body, Controller, Get, Post, Put, UseGuards, UsePipes } from '@nestjs/c
 import { Observable, mergeMap } from 'rxjs'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UserService } from './user.service'
-import { UserResponse } from './types/user-response.interface'
 import { LoginUserDto } from './dto/login-user.dto'
 import { User } from './decorators/user.decorator'
 import { UserEntity } from './user.entity'
 import { AuthGuard } from './guards/auth.guard'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { BackendValidationPipe } from '../common/pipes/backend-validation.pipe'
+import { CurrentUserResponse } from '@medium-clone/api-interfaces'
 
 @Controller()
 export class UserController {
@@ -16,7 +16,7 @@ export class UserController {
 
 	@Post('users')
 	@UsePipes(new BackendValidationPipe())
-	public create(@Body('user') createUserDto: CreateUserDto): Observable<UserResponse> {
+	public create(@Body('user') createUserDto: CreateUserDto): Observable<CurrentUserResponse> {
 		return this.userService
 			.create(createUserDto)
 			.pipe(mergeMap(user => this.userService.buildUserResponse(user)))
@@ -24,7 +24,7 @@ export class UserController {
 
 	@Post('users/login')
 	@UsePipes(new BackendValidationPipe())
-	public login(@Body('user') loginUserDto: LoginUserDto): Observable<UserResponse> {
+	public login(@Body('user') loginUserDto: LoginUserDto): Observable<CurrentUserResponse> {
 		return this.userService
 			.login(loginUserDto)
 			.pipe(mergeMap(user => this.userService.buildUserResponse(user)))
@@ -32,7 +32,7 @@ export class UserController {
 
 	@Get('user')
 	@UseGuards(AuthGuard)
-	public currentUser(@User() user: UserEntity): Observable<UserResponse> {
+	public currentUser(@User() user: UserEntity): Observable<CurrentUserResponse> {
 		return this.userService.buildUserResponse(user)
 	}
 
@@ -41,7 +41,7 @@ export class UserController {
 	public update(
 		@User('id') userId: number,
 		@Body('user') updateUserDto: UpdateUserDto,
-	): Observable<UserResponse> {
+	): Observable<CurrentUserResponse> {
 		return this.userService
 			.update(userId, updateUserDto)
 			.pipe(mergeMap(user => this.userService.buildUserResponse(user)))

@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms'
 import { select, Store } from '@ngrx/store'
 import { Observable } from 'rxjs'
 
-import { registerAction } from '../../store/actions/register.action'
+import { registerAction } from '../../store/actions/register.actions'
 import { isSubmittingSelector } from '../../store/auth.selectors'
 
 @Component({ selector: 'mc-register', templateUrl: './register.component.html' })
@@ -31,6 +31,6 @@ export class RegisterComponent implements OnInit {
 	}
 
 	public onSubmit(): void {
-		this.store.dispatch(registerAction(this.form.value))
+		this.store.dispatch(registerAction({ request: { user: this.form.value } }))
 	}
 }

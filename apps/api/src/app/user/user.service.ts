@@ -7,10 +7,10 @@ import { sign } from 'jsonwebtoken'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UserEntity } from './user.entity'
 import { JWT_SECRET } from '../../configs/jwt.config'
-import { UserResponse } from './types/user-response.interface'
 import { LoginUserDto } from './dto/login-user.dto'
 import { compare } from 'bcrypt'
 import { UpdateUserDto } from './dto/update-user.dto'
+import { CurrentUserResponse } from '@medium-clone/api-interfaces'
 
 @Injectable()
 export class UserService {
@@ -89,7 +89,7 @@ export class UserService {
 		return sign({ id, email, username }, JWT_SECRET)
 	}
 
-	public buildUserResponse(user: UserEntity): Observable<UserResponse> {
+	public buildUserResponse(user: UserEntity): Observable<CurrentUserResponse> {
 		delete user.password
 		return of({
 			user: {

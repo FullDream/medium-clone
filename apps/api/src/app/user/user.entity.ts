@@ -9,9 +9,10 @@ import {
 } from 'typeorm'
 import { hash } from 'bcrypt'
 import { ArticleEntity } from '../article/article.entity'
+import { CurrentUserInterface } from '@medium-clone/api-interfaces'
 
 @Entity({ name: 'users' })
-export class UserEntity {
+export class UserEntity implements Omit<CurrentUserInterface, 'token'> {
 	@PrimaryGeneratedColumn()
 	id: number
 
