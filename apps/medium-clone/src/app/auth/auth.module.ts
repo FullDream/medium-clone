@@ -7,15 +7,20 @@ import { StoreModule } from '@ngrx/store'
 import { RegisterComponent } from './components/register'
 import { authReducer, authReducerKey } from './store/auth.reducer'
 import { EffectsModule } from '@ngrx/effects'
-import { RegisterEffect } from './store/effects'
+import { LoginEffect, RegisterEffect } from './store/effects'
 import { AuthSevice } from './services'
 import { BackendErrorsMessagesComponent } from '../common/components/backend-errors-messages/backend-errors-messages.component'
 import { PersistanceService } from '../common/services/persistance.service'
+import { LoginComponent } from './components/login/login.component'
 
 const routes: Routes = [
 	{
 		path: 'register',
 		component: RegisterComponent,
+	},
+	{
+		path: 'login',
+		component: LoginComponent,
 	},
 ]
 
@@ -25,11 +30,11 @@ const routes: Routes = [
 		ReactiveFormsModule,
 		RouterModule.forChild(routes),
 		StoreModule.forFeature(authReducerKey, authReducer),
-		EffectsModule.forFeature([RegisterEffect]),
+		EffectsModule.forFeature([RegisterEffect, LoginEffect]),
 
 		BackendErrorsMessagesComponent,
 	],
-	declarations: [RegisterComponent],
+	declarations: [RegisterComponent, LoginComponent],
 	providers: [AuthSevice, PersistanceService],
 	exports: [RegisterComponent],
 })
