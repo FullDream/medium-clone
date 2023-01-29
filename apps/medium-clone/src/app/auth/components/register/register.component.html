@@ -9,7 +9,7 @@
 				<mc-backend-errors-messages
 					*ngIf="backendErrors$ | async as errors"
 					[backendErrors]="errors"
-				></mc-backend-errors-messages>
+				/>
 				<form [formGroup]="form" (ngSubmit)="onSubmit()">
 					<fieldset class="form-group">
 						<input

@@ -58,12 +58,12 @@ export const authReducer = createReducer(
 	),
 	on(
 		loginSuccessAction,
-		(state, { currentUser }): AuthStateInterface => ({
+		(state, action): AuthStateInterface => ({
 			...state,
 			isSubmitting: false,
 			isLoggedIn: true,
 			validationError: null,
-			currentUser,
+			currentUser: action.currentUser,
 		}),
 	),
 	on(

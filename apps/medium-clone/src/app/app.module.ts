@@ -7,14 +7,11 @@ import { EffectsModule } from '@ngrx/effects'
 
 import { AppComponent } from './app.component'
 import { environment } from '../environments/environment'
-import {HttpClientModule } from '@angular/common/http';
+import { HttpClientModule } from '@angular/common/http'
+import { NavBarComponent } from './common/components/nav-bar/nav-bar.component'
+import { AuthModule } from './auth/auth.module'
 
-const routes: Routes = [
-	{
-		path: 'auth',
-		loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule),
-	},
-]
+const routes: Routes = []
 @NgModule({
 	declarations: [AppComponent],
 	imports: [
@@ -33,6 +30,9 @@ const routes: Routes = [
 		),
 		StoreDevtoolsModule.instrument({ maxAge: 25, logOnly: environment.production }),
 		EffectsModule.forRoot([]),
+
+		AuthModule,
+		NavBarComponent,
 	],
 	providers: [],
 	bootstrap: [AppComponent],

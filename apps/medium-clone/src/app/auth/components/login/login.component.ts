@@ -3,7 +3,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms'
 import { Observable } from 'rxjs'
 import { BackendErrorsInterface } from '../../../common/types/backend-errors.interface'
 import { Store, select } from '@ngrx/store'
-import { isSubmittingSelector, ValidationErrorSelector } from '../../store/auth.selectors'
+import { isSubmittingSelector, validationErrorSelector } from '../../store/auth.selectors'
 import { loginAction } from '../../store/actions/login.actions'
 
 @Component({
@@ -31,7 +31,7 @@ export class LoginComponent implements OnInit {
 
 	private initializeValues(): void {
 		this.isSubmitting$ = this.store.pipe(select(isSubmittingSelector))
-		this.backendErrors$ = this.store.pipe(select(ValidationErrorSelector))
+		this.backendErrors$ = this.store.pipe(select(validationErrorSelector))
 	}
 
 	public onSubmit(): void {
