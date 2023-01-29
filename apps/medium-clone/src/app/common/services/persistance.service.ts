@@ -4,6 +4,8 @@ import { Injectable } from '@angular/core'
 export class PersistanceService {
 	public set<T>(key: string, data: T): void {
 		try {
+			console.log(data)
+
 			localStorage.setItem(key, JSON.stringify(data))
 		} catch (error) {
 			console.error('Error saving to local storage', error)

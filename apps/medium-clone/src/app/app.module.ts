@@ -7,9 +7,11 @@ import { EffectsModule } from '@ngrx/effects'
 
 import { AppComponent } from './app.component'
 import { environment } from '../environments/environment'
-import { HttpClientModule } from '@angular/common/http'
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http'
 import { NavBarComponent } from './common/components/nav-bar/nav-bar.component'
 import { AuthModule } from './auth/auth.module'
+import { PersistanceService } from './common/services/persistance.service'
+import { AuthInterceptor } from './common/services/auth.interceptor'
 
 const routes: Routes = []
 @NgModule({
@@ -34,7 +36,10 @@ const routes: Routes = []
 		AuthModule,
 		NavBarComponent,
 	],
-	providers: [],
+	providers: [
+		PersistanceService,
+		{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+	],
 	bootstrap: [AppComponent],
 })
 export class AppModule {}

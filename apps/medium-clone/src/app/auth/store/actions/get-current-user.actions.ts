@@ -5,7 +5,7 @@ import { CurrentUserInterface } from '@medium-clone/api-interfaces'
 export const getCurrentUserAction = createAction(ActionsTypes.GET_CURRENT_USER)
 
 export const getCurrentUserSuccessAction = createAction(
-	ActionsTypes.GET_CURRENT_USER,
+	ActionsTypes.GET_CURRENT_USER_SUCCESS,
 	props<{ currentUser: CurrentUserInterface }>(),
 )
 

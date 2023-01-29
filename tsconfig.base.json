@@ -15,7 +15,8 @@
 		"skipDefaultLibCheck": true,
 		"baseUrl": ".",
 		"paths": {
-			"@medium-clone/api-interfaces": ["libs/api-interfaces/src/index.ts"]
+			"@medium-clone/api-interfaces": ["libs/api-interfaces/src/index.ts"],
+			"@medium-clone/frontend/*": ["apps/medium-clone/src/*"]
 		}
 	},
 	"exclude": ["node_modules", "tmp"]

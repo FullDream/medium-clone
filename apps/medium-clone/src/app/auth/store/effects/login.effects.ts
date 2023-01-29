@@ -8,6 +8,7 @@ import { HttpErrorResponse } from '@angular/common/http'
 import { PersistanceService } from '../../../common/services/persistance.service'
 import { Router } from '@angular/router'
 import { loginAction, loginFailureAction, loginSuccessAction } from '../actions'
+import { StorageKeys } from '../../../common/constants/storage-keys.enum'
 
 @Injectable()
 export class LoginEffect {
@@ -17,7 +18,9 @@ export class LoginEffect {
 			switchMap(({ request }) =>
 				this.authSevice.login(request).pipe(
 					map((currentUser: CurrentUserInterface) => {
-						this.persistanceService.set('accessToken', currentUser.token)
+						console.log(currentUser.token)
+
+						this.persistanceService.set(StorageKeys.ACCESS_TOKEN, currentUser.token)
 						return loginSuccessAction({ currentUser })
 					}),
 					catchError((errorResponse: HttpErrorResponse) =>

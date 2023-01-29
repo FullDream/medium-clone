@@ -10,6 +10,7 @@ import {
 	getCurrentUserSuccessAction,
 	getCurrentUserFailureAction,
 } from '../actions'
+import { StorageKeys } from '@medium-clone/frontend/app/common/constants/storage-keys.enum'
 
 @Injectable()
 export class GetCurrentUserEffect {
@@ -17,7 +18,7 @@ export class GetCurrentUserEffect {
 		this.actions$.pipe(
 			ofType(getCurrentUserAction),
 			switchMap(() => {
-				if (!this.persistanceService.get<string>('token')) {
+				if (!this.persistanceService.get<string>(StorageKeys.ACCESS_TOKEN)) {
 					return of(getCurrentUserFailureAction())
 				}
 

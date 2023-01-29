@@ -8,6 +8,7 @@ import { AuthSevice } from '../../services/auth.service'
 import { HttpErrorResponse } from '@angular/common/http'
 import { PersistanceService } from '../../../common/services/persistance.service'
 import { Router } from '@angular/router'
+import { StorageKeys } from '@medium-clone/frontend/app/common/constants/storage-keys.enum'
 
 @Injectable()
 export class RegisterEffect {
@@ -17,7 +18,7 @@ export class RegisterEffect {
 			switchMap(({ request }) =>
 				this.authSevice.register(request).pipe(
 					map((currentUser: CurrentUserInterface) => {
-						this.persistanceService.set('accessToken', currentUser.token)
+						this.persistanceService.set(StorageKeys.ACCESS_TOKEN, currentUser.token)
 						return registerSuccessAction({ currentUser })
 					}),
 					catchError((errorResponse: HttpErrorResponse) =>
