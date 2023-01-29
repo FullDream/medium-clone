@@ -9,6 +9,8 @@ import { authReducer, authReducerKey } from './store/auth.reducer'
 import { EffectsModule } from '@ngrx/effects'
 import { RegisterEffect } from './store/effects'
 import { AuthSevice } from './services'
+import { BackendErrorsMessagesComponent } from '../common/components/backend-errors-messages/backend-errors-messages.component'
+import { PersistanceService } from '../common/services/persistance.service'
 
 const routes: Routes = [
 	{
@@ -24,9 +26,11 @@ const routes: Routes = [
 		RouterModule.forChild(routes),
 		StoreModule.forFeature(authReducerKey, authReducer),
 		EffectsModule.forFeature([RegisterEffect]),
+
+		BackendErrorsMessagesComponent,
 	],
 	declarations: [RegisterComponent],
-	providers: [AuthSevice],
+	providers: [AuthSevice, PersistanceService],
 	exports: [RegisterComponent],
 })
 export class AuthModule {}
